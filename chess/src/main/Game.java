@@ -96,6 +96,13 @@ public class Game extends MouseAdapter {
             return;
         }
         if(validateMove(pieceIndex, moveIndex, piece) == 1) {
+            if(isWhiteTurn && moveIndex / 8 == 4 && board.board[pieceIndex] == 'P' && pieceIndex / 8 == 6){
+                blackEnpassant[0] = 1;
+                blackEnpassant[1] = moveIndex ;
+            }else if(!isWhiteTurn && moveIndex / 8 == 3 && board.board[pieceIndex] == 'p' && pieceIndex / 8 == 1){
+                whiteEnpassatnt[0] = 1;
+                whiteEnpassatnt[1] = moveIndex;
+            }
             if(pawnMove(board.board, pieceIndex, moveIndex) == 2 && whiteEnpassantMade){
                 clearEnpassant();
                 board.board[moveIndex+8] = ' ';
@@ -425,8 +432,6 @@ public class Game extends MouseAdapter {
                 }
                 return 1;
             }else if((pieceIndex <=55 && pieceIndex >=48) && pieceIndex-16 == moveIndex && board[moveIndex] == ' '){
-                blackEnpassant[0] = 1;
-                blackEnpassant[1] = moveIndex;
                 return 1;
             }else if((pieceIndex-9 == moveIndex || pieceIndex-7 == moveIndex) && Character.isLowerCase(board[moveIndex]) && moveIndex / 8 == pieceIndex / 8 - 1) {
                 if(moveIndex / 8 == 0){
@@ -444,8 +449,6 @@ public class Game extends MouseAdapter {
                 }
                 return 1;
             }else if((pieceIndex <=15 && pieceIndex >=8) && pieceIndex+16 == moveIndex && board[moveIndex] == ' '){
-                whiteEnpassatnt[0] = 1;
-                whiteEnpassatnt[1] = moveIndex;
                 return 1;
             }else if((pieceIndex+9 == moveIndex || pieceIndex+7 == moveIndex) && Character.isUpperCase(board[moveIndex]) && moveIndex / 8 == pieceIndex / 8 + 1) {
                 if(moveIndex / 8 == 7){
