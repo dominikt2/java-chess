@@ -95,75 +95,86 @@ public class Game extends MouseAdapter {
         if (piece == ' ') {
             return;
         }
-        if(validateMove(pieceIndex, moveIndex, piece) == 1) {
-            if(isWhiteTurn && moveIndex / 8 == 4 && board.board[pieceIndex] == 'P' && pieceIndex / 8 == 6){
-                blackEnpassant[0] = 1;
-                blackEnpassant[1] = moveIndex ;
-            }else if(!isWhiteTurn && moveIndex / 8 == 3 && board.board[pieceIndex] == 'p' && pieceIndex / 8 == 1){
-                whiteEnpassatnt[0] = 1;
-                whiteEnpassatnt[1] = moveIndex;
-            }
-            if(pawnMove(board.board, pieceIndex, moveIndex) == 2 && whiteEnpassantMade){
+
+        if(!isKingMated(board.board)) {
+            if(validateMove(pieceIndex, moveIndex, piece) == 1) {
+                if(isWhiteTurn && moveIndex / 8 == 4 && board.board[pieceIndex] == 'P' && pieceIndex / 8 == 6){
+                    blackEnpassant[0] = 1;
+                    blackEnpassant[1] = moveIndex ;
+                }else if(!isWhiteTurn && moveIndex / 8 == 3 && board.board[pieceIndex] == 'p' && pieceIndex / 8 == 1){
+                    whiteEnpassatnt[0] = 1;
+                    whiteEnpassatnt[1] = moveIndex;
+                }
+                if(pawnMove(board.board, pieceIndex, moveIndex) == 2 && whiteEnpassantMade){
+                    clearEnpassant();
+                    board.board[moveIndex+8] = ' ';
+                    whiteEnpassantMade = false;
+                }else if(blackEnpassantMade && pawnMove(board.board, pieceIndex, moveIndex) == 2){
+                    clearEnpassant();
+                    board.board[moveIndex-8] = ' ';
+                    blackEnpassantMade = false;
+                }
                 clearEnpassant();
-                board.board[moveIndex+8] = ' ';
-                whiteEnpassantMade = false;
-            }else if(blackEnpassantMade && pawnMove(board.board, pieceIndex, moveIndex) == 2){
+                board.board[moveIndex] = board.board[pieceIndex];
+                board.board[pieceIndex] = ' ';
+                isWhiteTurn = !isWhiteTurn;
+                board.repaint();
+                if(board.board[moveIndex] == 'K') {
+                    whiteKingMoved++;
+                }else if(board.board[moveIndex] == 'k') {
+                    blackKingMoved++;
+                }else if(piece == 'R' && tempPieceIndex == 56){
+                    whiteRookMoved[0]++;
+                }else if(piece == 'R' && tempPieceIndex == 63) {
+                    whiteRookMoved[1]++;
+                }else if(piece == 'r' && tempPieceIndex == 0){
+                    blackRookMoved[0]++;
+                }else if(piece == 'r' && tempPieceIndex == 7) {
+                    blackRookMoved[1]++;
+                }
+            }else if(validateMove(pieceIndex, moveIndex, piece) == 2){
                 clearEnpassant();
-                board.board[moveIndex-8] = ' ';
-                blackEnpassantMade = false;
-            }
-            clearEnpassant();
-            board.board[moveIndex] = board.board[pieceIndex];
-            board.board[pieceIndex] = ' ';
-            isWhiteTurn = !isWhiteTurn;
-            board.repaint();
-            if(board.board[moveIndex] == 'K') {
-                whiteKingMoved++;
-            }else if(board.board[moveIndex] == 'k') {
-                blackKingMoved++;
-            }else if(piece == 'R' && tempPieceIndex == 56){
-                whiteRookMoved[0]++;
-            }else if(piece == 'R' && tempPieceIndex == 63) {
-                whiteRookMoved[1]++;
-            }else if(piece == 'r' && tempPieceIndex == 0){
-                blackRookMoved[0]++;
-            }else if(piece == 'r' && tempPieceIndex == 7) {
-                blackRookMoved[1]++;
-            }
-        }else if(validateMove(pieceIndex, moveIndex, piece) == 2){
-            clearEnpassant();
-            board.board[moveIndex] = board.board[pieceIndex];
-            board.board[pieceIndex + 1] = board.board[pieceIndex + 3];
-            board.board[pieceIndex + 3] = ' ';
-            board.board[pieceIndex] = ' ';
-            board.repaint();
-            isWhiteTurn = !isWhiteTurn;
-        }else if(validateMove(pieceIndex, moveIndex, piece) == 3){
-            clearEnpassant();
-            board.board[moveIndex] = board.board[pieceIndex];
-            board.board[pieceIndex - 1] = board.board[pieceIndex - 4];
-            board.board[pieceIndex - 4] = ' ';
-            board.board[pieceIndex] = ' ';
-            board.repaint();
-            isWhiteTurn = !isWhiteTurn;
-        }else if(validateMove(pieceIndex, moveIndex, piece) == 4){
-            if(isWhiteTurn){
-                clearEnpassant();
-                board.board[moveIndex] = 'Q';
+                board.board[moveIndex] = board.board[pieceIndex];
+                board.board[pieceIndex + 1] = board.board[pieceIndex + 3];
+                board.board[pieceIndex + 3] = ' ';
                 board.board[pieceIndex] = ' ';
                 board.repaint();
                 isWhiteTurn = !isWhiteTurn;
-                paintPromotionMenuWhite(board.getGraphics());
-            }else {
+            }else if(validateMove(pieceIndex, moveIndex, piece) == 3){
                 clearEnpassant();
-                board.board[moveIndex] = 'q';
+                board.board[moveIndex] = board.board[pieceIndex];
+                board.board[pieceIndex - 1] = board.board[pieceIndex - 4];
+                board.board[pieceIndex - 4] = ' ';
                 board.board[pieceIndex] = ' ';
                 board.repaint();
                 isWhiteTurn = !isWhiteTurn;
-                paintPromotionMenuWhite(board.getGraphics());
+            }else if(validateMove(pieceIndex, moveIndex, piece) == 4){
+                if(isWhiteTurn){
+                    clearEnpassant();
+                    board.board[moveIndex] = 'Q';
+                    board.board[pieceIndex] = ' ';
+                    board.repaint();
+                    isWhiteTurn = !isWhiteTurn;
+                    paintPromotionMenuWhite(board.getGraphics());
+                }else {
+                    clearEnpassant();
+                    board.board[moveIndex] = 'q';
+                    board.board[pieceIndex] = ' ';
+                    board.repaint();
+                    isWhiteTurn = !isWhiteTurn;
+                    paintPromotionMenuWhite(board.getGraphics());
+                }
+            }else{
+                return;
             }
         }else{
-            return;
+            if(isKingChecked(board.board, findKingPosition('k'))){
+                System.out.println("White wins");
+            }else if(isKingChecked(board.board, findKingPosition('K'))){
+                System.out.println("Black wins");
+            }else{
+                System.out.println("Stalemate");
+            }
         }
     }
 
@@ -172,6 +183,30 @@ public class Game extends MouseAdapter {
         board[pieceIndex] = ' ';
         return board;
     }
+
+    public static boolean isKingMated(char[] board){
+        for(int i=0; i<64; i++){
+            for(int j=0; j<64; j++){
+                if(validateMove(i, j, board[i]) !=0){
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+//    public static boolean isStalemate(char[] board){
+//        if((isWhiteTurn && !isKingChecked(board, findKingPosition('K')) )|| !isWhiteTurn && !isKingChecked(board, findKingPosition('k'))){
+//            for(int i=0; i<64; i++){
+//                for(int j=0; j<64; j++){
+//                    if(validateMove(i, j, board[i]) !=0){
+//                        return false;
+//                    }
+//                }
+//            }
+//        }
+//        return true;
+//    }
 
     public static boolean isKingChecked(char[] board, int kingPosition) {
             if(isWhiteTurn){
