@@ -54,7 +54,7 @@ public class Game extends MouseAdapter {
         // MOZE KIEDYS XD
     }
 
-     public static void paintValidMoves(Graphics g) {
+    public static void paintValidMoves(Graphics g) {
         Graphics2D g2d = (Graphics2D) g;
         g2d.setColor(new Color(56, 203, 56, 100));
         for (int index : validMoves) {
@@ -97,9 +97,11 @@ public class Game extends MouseAdapter {
         }
         if(validateMove(pieceIndex, moveIndex, piece) == 1) {
             if(pawnMove(board.board, pieceIndex, moveIndex) == 2 && whiteEnpassantMade){
+                clearEnpassant();
                 board.board[moveIndex+8] = ' ';
                 whiteEnpassantMade = false;
             }else if(blackEnpassantMade && pawnMove(board.board, pieceIndex, moveIndex) == 2){
+                clearEnpassant();
                 board.board[moveIndex-8] = ' ';
                 blackEnpassantMade = false;
             }
@@ -122,6 +124,7 @@ public class Game extends MouseAdapter {
                 blackRookMoved[1]++;
             }
         }else if(validateMove(pieceIndex, moveIndex, piece) == 2){
+            clearEnpassant();
             board.board[moveIndex] = board.board[pieceIndex];
             board.board[pieceIndex + 1] = board.board[pieceIndex + 3];
             board.board[pieceIndex + 3] = ' ';
@@ -129,6 +132,7 @@ public class Game extends MouseAdapter {
             board.repaint();
             isWhiteTurn = !isWhiteTurn;
         }else if(validateMove(pieceIndex, moveIndex, piece) == 3){
+            clearEnpassant();
             board.board[moveIndex] = board.board[pieceIndex];
             board.board[pieceIndex - 1] = board.board[pieceIndex - 4];
             board.board[pieceIndex - 4] = ' ';
@@ -137,12 +141,14 @@ public class Game extends MouseAdapter {
             isWhiteTurn = !isWhiteTurn;
         }else if(validateMove(pieceIndex, moveIndex, piece) == 4){
             if(isWhiteTurn){
+                clearEnpassant();
                 board.board[moveIndex] = 'Q';
                 board.board[pieceIndex] = ' ';
                 board.repaint();
                 isWhiteTurn = !isWhiteTurn;
                 paintPromotionMenuWhite(board.getGraphics());
             }else {
+                clearEnpassant();
                 board.board[moveIndex] = 'q';
                 board.board[pieceIndex] = ' ';
                 board.repaint();
@@ -419,8 +425,11 @@ public class Game extends MouseAdapter {
                 }
                 return 1;
             }else if((pieceIndex <=55 && pieceIndex >=48) && pieceIndex-16 == moveIndex && board[moveIndex] == ' '){
-                blackEnpassant[0] = 1;
-                blackEnpassant[1] = moveIndex;
+                if(board[pieceIndex+1] == 'p' || board[pieceIndex-1] == 'p') {
+                    blackEnpassant[0] = 1;
+                    blackEnpassant[1] = moveIndex;
+                    return 1;
+                }
                 return 1;
             }else if((pieceIndex-9 == moveIndex || pieceIndex-7 == moveIndex) && Character.isLowerCase(board[moveIndex]) && moveIndex / 8 == pieceIndex / 8 - 1) {
                 if(moveIndex / 8 == 0){
@@ -438,8 +447,11 @@ public class Game extends MouseAdapter {
                 }
                 return 1;
             }else if((pieceIndex <=15 && pieceIndex >=8) && pieceIndex+16 == moveIndex && board[moveIndex] == ' '){
-                whiteEnpassatnt[0] = 1;
-                whiteEnpassatnt[1] = moveIndex;
+                if(board[pieceIndex+1] == 'P' || board[pieceIndex-1] == 'P') {
+                    whiteEnpassatnt[0] = 1;
+                    whiteEnpassatnt[1] = moveIndex;
+                    return 1;
+                }
                 return 1;
             }else if((pieceIndex+9 == moveIndex || pieceIndex+7 == moveIndex) && Character.isUpperCase(board[moveIndex]) && moveIndex / 8 == pieceIndex / 8 + 1) {
                 if(moveIndex / 8 == 7){
