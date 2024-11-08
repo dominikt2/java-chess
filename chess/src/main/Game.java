@@ -425,11 +425,8 @@ public class Game extends MouseAdapter {
                 }
                 return 1;
             }else if((pieceIndex <=55 && pieceIndex >=48) && pieceIndex-16 == moveIndex && board[moveIndex] == ' '){
-                if(board[pieceIndex+1] == 'p' || board[pieceIndex-1] == 'p') {
-                    blackEnpassant[0] = 1;
-                    blackEnpassant[1] = moveIndex;
-                    return 1;
-                }
+                blackEnpassant[0] = 1;
+                blackEnpassant[1] = moveIndex;
                 return 1;
             }else if((pieceIndex-9 == moveIndex || pieceIndex-7 == moveIndex) && Character.isLowerCase(board[moveIndex]) && moveIndex / 8 == pieceIndex / 8 - 1) {
                 if(moveIndex / 8 == 0){
@@ -447,11 +444,8 @@ public class Game extends MouseAdapter {
                 }
                 return 1;
             }else if((pieceIndex <=15 && pieceIndex >=8) && pieceIndex+16 == moveIndex && board[moveIndex] == ' '){
-                if(board[pieceIndex+1] == 'P' || board[pieceIndex-1] == 'P') {
-                    whiteEnpassatnt[0] = 1;
-                    whiteEnpassatnt[1] = moveIndex;
-                    return 1;
-                }
+                whiteEnpassatnt[0] = 1;
+                whiteEnpassatnt[1] = moveIndex;
                 return 1;
             }else if((pieceIndex+9 == moveIndex || pieceIndex+7 == moveIndex) && Character.isUpperCase(board[moveIndex]) && moveIndex / 8 == pieceIndex / 8 + 1) {
                 if(moveIndex / 8 == 7){
