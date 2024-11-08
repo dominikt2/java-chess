@@ -1,5 +1,5 @@
 # java-chess
-# _**TESTED IN IntelIJ on JAVA jdk-18**_ </br>
+# _**TESTED IN IntelliJ IDEA on JAVA jdk-18**_ </br>
 
 Functional graphical chess game made fully in java. </br>
 
