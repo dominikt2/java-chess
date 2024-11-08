@@ -54,12 +54,27 @@ public class Game extends MouseAdapter {
         // MOZE KIEDYS XD
     }
 
-    public static void paintValidMoves(Graphics g) {
+     public static void paintValidMoves(Graphics g) {
         Graphics2D g2d = (Graphics2D) g;
         g2d.setColor(new Color(56, 203, 56, 100));
         for (int index : validMoves) {
             g2d.fillRect((index % 8) * tileSize, (index / 8) * tileSize, tileSize, tileSize);
         }
+
+        int kingPosition = isWhiteTurn ? findKingPosition('K') : findKingPosition('k');
+        if (isKingChecked(board.board, kingPosition)) {
+            g2d.setColor(new Color(255, 0, 0, 100));
+            g2d.fillRect((kingPosition % 8) * tileSize, (kingPosition / 8) * tileSize, tileSize, tileSize);
+        }
+    }
+
+    public static int findKingPosition(char king) {
+        for (int i = 0; i < 64; i++) {
+            if (board.board[i] == king) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     @Override
