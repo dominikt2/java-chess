@@ -1,7 +1,7 @@
 # java-chess
 Functional graphical chess game made fully in java.
 
-<font size="3">_**TESTED IN IntelIJ on JAVA jdk-18**_ </br> </br> </font>
+<font size="18">_**TESTED IN IntelIJ on JAVA jdk-18**_ </br> </br> </font>
 How to run:
 
   - download all files
