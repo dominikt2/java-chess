@@ -9,6 +9,7 @@ public class Game extends MouseAdapter {
 
     public static int tileSize = 100;
     static Board board;
+    private static boolean aiMakingMove = false;
 
     public static boolean isWhiteTurn = true;
     public int pieceCol, pieceRow;
@@ -42,11 +43,24 @@ public class Game extends MouseAdapter {
         char piece = board.board[pieceIndex];
         if (piece != ' ') {
             for (int i = 0; i < 64; i++) {
-                if (validateMove(pieceIndex, i, piece) != 0) {
+                if (validateMove(pieceIndex, i, board.board) != 0) {
                     validMoves.add(i);
                 }
             }
             paintValidMoves(board.getGraphics());
+        }
+    }
+
+    public static void handleMove(int pieceIndex, int moveIndex) {
+        makeMove(pieceIndex, moveIndex, board.board);
+        if (!aiMakingMove && !isWhiteTurn) {
+            aiMakingMove = true;
+            char[] newBoard = trebfish.makeAiMove(board.board);
+            for (int i = 0; i < 64; i++) {
+                board.board[i] = newBoard[i];
+            }
+            board.repaint();
+            aiMakingMove = false;
         }
     }
 
@@ -82,101 +96,99 @@ public class Game extends MouseAdapter {
         moveCol = e.getX() / board.tileSize;
         moveRow = e.getY() / board.tileSize;
 
-        makeMove(pieceCol, pieceRow, moveCol, moveRow);
-        validMoves.clear(); // Clear the highlighted squares
-        board.repaint();
+        int pieceIndex = pieceRow * 8 + pieceCol;
+        int moveIndex = moveRow * 8 + moveCol;
+        handleMove(pieceIndex, moveIndex);
     }
 
-    public static void makeMove(int pieceCol, int pieceRow, int moveCol, int moveRow) {
-        int pieceIndex = pieceRow * 8 + pieceCol;
+    public static void makeMove(int pieceIndex, int moveIndex, char[] chessBoard) {
         int tempPieceIndex = pieceIndex;
-        int moveIndex = moveRow * 8 + moveCol;
-        char piece = board.board[pieceIndex];
+        char piece = chessBoard[pieceIndex];
         if (piece == ' ') {
             return;
         }
 
-        if(!isKingMated(board.board)) {
-            if(validateMove(pieceIndex, moveIndex, piece) == 1) {
-                if(isWhiteTurn && moveIndex / 8 == 4 && board.board[pieceIndex] == 'P' && pieceIndex / 8 == 6){
-                    blackEnpassant[0] = 1;
-                    blackEnpassant[1] = moveIndex ;
-                }else if(!isWhiteTurn && moveIndex / 8 == 3 && board.board[pieceIndex] == 'p' && pieceIndex / 8 == 1){
-                    whiteEnpassatnt[0] = 1;
-                    whiteEnpassatnt[1] = moveIndex;
-                }
-                if(pawnMove(board.board, pieceIndex, moveIndex) == 2 && whiteEnpassantMade){
+        if (!isKingMated(chessBoard)) {
+                if (validateMove(pieceIndex, moveIndex, chessBoard) == 1) {
+                    if (isWhiteTurn && moveIndex / 8 == 4 && chessBoard[pieceIndex] == 'P' && pieceIndex / 8 == 6) {
+                        blackEnpassant[0] = 1;
+                        blackEnpassant[1] = moveIndex;
+                    } else if (!isWhiteTurn && moveIndex / 8 == 3 && chessBoard[pieceIndex] == 'p' && pieceIndex / 8 == 1) {
+                        whiteEnpassatnt[0] = 1;
+                        whiteEnpassatnt[1] = moveIndex;
+                    }
+                    if (pawnMove(chessBoard, pieceIndex, moveIndex) == 2 && whiteEnpassantMade) {
+                        clearEnpassant();
+                        chessBoard[moveIndex + 8] = ' ';
+                        whiteEnpassantMade = false;
+                    } else if (blackEnpassantMade && pawnMove(chessBoard, pieceIndex, moveIndex) == 2) {
+                        clearEnpassant();
+                        chessBoard[moveIndex - 8] = ' ';
+                        blackEnpassantMade = false;
+                    }
                     clearEnpassant();
-                    board.board[moveIndex+8] = ' ';
-                    whiteEnpassantMade = false;
-                }else if(blackEnpassantMade && pawnMove(board.board, pieceIndex, moveIndex) == 2){
-                    clearEnpassant();
-                    board.board[moveIndex-8] = ' ';
-                    blackEnpassantMade = false;
-                }
-                clearEnpassant();
-                board.board[moveIndex] = board.board[pieceIndex];
-                board.board[pieceIndex] = ' ';
-                isWhiteTurn = !isWhiteTurn;
-                board.repaint();
-                if(board.board[moveIndex] == 'K') {
-                    whiteKingMoved++;
-                }else if(board.board[moveIndex] == 'k') {
-                    blackKingMoved++;
-                }else if(piece == 'R' && tempPieceIndex == 56){
-                    whiteRookMoved[0]++;
-                }else if(piece == 'R' && tempPieceIndex == 63) {
-                    whiteRookMoved[1]++;
-                }else if(piece == 'r' && tempPieceIndex == 0){
-                    blackRookMoved[0]++;
-                }else if(piece == 'r' && tempPieceIndex == 7) {
-                    blackRookMoved[1]++;
-                }
-            }else if(validateMove(pieceIndex, moveIndex, piece) == 2){
-                clearEnpassant();
-                board.board[moveIndex] = board.board[pieceIndex];
-                board.board[pieceIndex + 1] = board.board[pieceIndex + 3];
-                board.board[pieceIndex + 3] = ' ';
-                board.board[pieceIndex] = ' ';
-                board.repaint();
-                isWhiteTurn = !isWhiteTurn;
-            }else if(validateMove(pieceIndex, moveIndex, piece) == 3){
-                clearEnpassant();
-                board.board[moveIndex] = board.board[pieceIndex];
-                board.board[pieceIndex - 1] = board.board[pieceIndex - 4];
-                board.board[pieceIndex - 4] = ' ';
-                board.board[pieceIndex] = ' ';
-                board.repaint();
-                isWhiteTurn = !isWhiteTurn;
-            }else if(validateMove(pieceIndex, moveIndex, piece) == 4){
-                if(isWhiteTurn){
-                    clearEnpassant();
-                    board.board[moveIndex] = 'Q';
-                    board.board[pieceIndex] = ' ';
+                    chessBoard[moveIndex] = chessBoard[pieceIndex];
+                    chessBoard[pieceIndex] = ' ';
                     board.repaint();
-                    isWhiteTurn = !isWhiteTurn;
-                    paintPromotionMenuWhite(board.getGraphics());
-                }else {
+                    if (chessBoard[moveIndex] == 'K') {
+                        whiteKingMoved++;
+                    } else if (chessBoard[moveIndex] == 'k') {
+                        blackKingMoved++;
+                    } else if (piece == 'R' && tempPieceIndex == 56) {
+                        whiteRookMoved[0]++;
+                    } else if (piece == 'R' && tempPieceIndex == 63) {
+                        whiteRookMoved[1]++;
+                    } else if (piece == 'r' && tempPieceIndex == 0) {
+                        blackRookMoved[0]++;
+                    } else if (piece == 'r' && tempPieceIndex == 7) {
+                        blackRookMoved[1]++;
+                    }
+                } else if (validateMove(pieceIndex, moveIndex, chessBoard) == 2) {
                     clearEnpassant();
-                    board.board[moveIndex] = 'q';
-                    board.board[pieceIndex] = ' ';
+                    chessBoard[moveIndex] = chessBoard[pieceIndex];
+                    chessBoard[pieceIndex + 1] = chessBoard[pieceIndex + 3];
+                    chessBoard[pieceIndex + 3] = ' ';
+                    chessBoard[pieceIndex] = ' ';
                     board.repaint();
-                    isWhiteTurn = !isWhiteTurn;
-                    paintPromotionMenuWhite(board.getGraphics());
+                } else if (validateMove(pieceIndex, moveIndex, chessBoard) == 3) {
+                    clearEnpassant();
+                    chessBoard[moveIndex] = chessBoard[pieceIndex];
+                    chessBoard[pieceIndex - 1] = chessBoard[pieceIndex - 4];
+                    chessBoard[pieceIndex - 4] = ' ';
+                    chessBoard[pieceIndex] = ' ';
+                    board.repaint();
+                } else if (validateMove(pieceIndex, moveIndex, chessBoard) == 4) {
+                    if (isWhiteTurn) {
+                        clearEnpassant();
+                        chessBoard[moveIndex] = 'Q';
+                        chessBoard[pieceIndex] = ' ';
+                        board.repaint();
+                        paintPromotionMenuWhite(board.getGraphics());
+                    } else {
+                        clearEnpassant();
+                        chessBoard[moveIndex] = 'q';
+                        chessBoard[pieceIndex] = ' ';
+                        board.repaint();
+                        paintPromotionMenuWhite(board.getGraphics());
+                    }
+                } else {
+                    return;
                 }
-            }else{
-                return;
+            } else {
+                if (isKingChecked(chessBoard, findKingPosition('k'))) {
+                    System.out.println("White wins");
+                } else if (isKingChecked(chessBoard, findKingPosition('K'))) {
+                    System.out.println("Black wins");
+                } else {
+                    System.out.println("Stalemate");
+                }
             }
-        }else{
-            if(isKingChecked(board.board, findKingPosition('k'))){
-                System.out.println("White wins");
-            }else if(isKingChecked(board.board, findKingPosition('K'))){
-                System.out.println("Black wins");
-            }else{
-                System.out.println("Stalemate");
-            }
+            isWhiteTurn = !isWhiteTurn;
         }
-    }
+
+
+
+
 
     public static char[] makeTemporarMove(char[] board, int pieceIndex, int moveIndex){
         board[moveIndex] = board[pieceIndex];
@@ -187,26 +199,13 @@ public class Game extends MouseAdapter {
     public static boolean isKingMated(char[] board){
         for(int i=0; i<64; i++){
             for(int j=0; j<64; j++){
-                if(validateMove(i, j, board[i]) !=0){
+                if(validateMove(i, j, board) !=0){
                     return false;
                 }
             }
         }
         return true;
     }
-
-//    public static boolean isStalemate(char[] board){
-//        if((isWhiteTurn && !isKingChecked(board, findKingPosition('K')) )|| !isWhiteTurn && !isKingChecked(board, findKingPosition('k'))){
-//            for(int i=0; i<64; i++){
-//                for(int j=0; j<64; j++){
-//                    if(validateMove(i, j, board[i]) !=0){
-//                        return false;
-//                    }
-//                }
-//            }
-//        }
-//        return true;
-//    }
 
     public static boolean isKingChecked(char[] board, int kingPosition) {
             if(isWhiteTurn){
@@ -294,65 +293,66 @@ public class Game extends MouseAdapter {
         return true;
     }
 
-    public static int validateMove(int pieceIndex, int moveIndex, char piece) {
+    public static int validateMove(int pieceIndex, int moveIndex, char[] board) {
+        char piece = board[pieceIndex];
         if (isWhiteTurn) {
-            if(piece == 'P' && pawnMove(board.board, pieceIndex, moveIndex) != 0) {
-                if(pawnMove(board.board, pieceIndex, moveIndex) == 1 && canPieceMove(pieceIndex, moveIndex)){
+            if(piece == 'P' && pawnMove(board, pieceIndex, moveIndex) != 0) {
+                if(pawnMove(board, pieceIndex, moveIndex) == 1 && canPieceMove(pieceIndex, moveIndex)){
                     return 1;
-                }else if(pawnMove(board.board, pieceIndex, moveIndex) == 2 && canPawnEnpassant(pieceIndex, moveIndex)){
+                }else if(pawnMove(board, pieceIndex, moveIndex) == 2 && canPawnEnpassant(pieceIndex, moveIndex)){
                     return 1;
-                }else if(pawnMove(board.board, pieceIndex, moveIndex) == 3 && canPieceMove(pieceIndex, moveIndex)){
+                }else if(pawnMove(board, pieceIndex, moveIndex) == 3 && canPieceMove(pieceIndex, moveIndex)){
                     return 4;
                 }
-            } else if (piece == 'R' && (horizontalMove(board.board,pieceIndex, moveIndex) || verticalMove(board.board,pieceIndex, moveIndex))) {
+            } else if (piece == 'R' && (horizontalMove(board,pieceIndex, moveIndex) || verticalMove(board,pieceIndex, moveIndex))) {
                 if(canPieceMove(pieceIndex, moveIndex)){
                     return 1;
                 }
-            } else if (piece == 'Q' && (horizontalMove(board.board,pieceIndex, moveIndex) || verticalMove(board.board,pieceIndex, moveIndex) || diagonalMove(board.board,pieceIndex, moveIndex))) {
+            } else if (piece == 'Q' && (horizontalMove(board,pieceIndex, moveIndex) || verticalMove(board,pieceIndex, moveIndex) || diagonalMove(board,pieceIndex, moveIndex))) {
                 if(canPieceMove(pieceIndex, moveIndex)){
                     return 1;
                 }
-            } else if (piece == 'N' && knightMove(board.board,pieceIndex, moveIndex)) {
+            } else if (piece == 'N' && knightMove(board,pieceIndex, moveIndex)) {
                 if(canPieceMove(pieceIndex, moveIndex)){
                     return 1;
                 }
-            } else if (piece == 'B' && diagonalMove(board.board,pieceIndex, moveIndex)) {
+            } else if (piece == 'B' && diagonalMove(board,pieceIndex, moveIndex)) {
                 if(canPieceMove(pieceIndex, moveIndex)){
                     return 1;
                 }
-            } else if (piece == 'K' && kingMove(board.board,pieceIndex, moveIndex) != 0) {
+            } else if (piece == 'K' && kingMove(board,pieceIndex, moveIndex) != 0) {
                 if(canPieceMove(pieceIndex, moveIndex)){
-                    return kingMove(board.board,pieceIndex, moveIndex);
+                    return kingMove(board,pieceIndex, moveIndex);
                 }
             }
         }else{
-            if (piece == 'p' && pawnMove(board.board,pieceIndex, moveIndex) != 0) {
-                if(pawnMove(board.board, pieceIndex, moveIndex) == 1 && canPieceMove(pieceIndex, moveIndex)){
+            if (piece == 'p' && pawnMove(board,pieceIndex, moveIndex) != 0) {
+                if(pawnMove(board, pieceIndex, moveIndex) == 1 && canPieceMove(pieceIndex, moveIndex)){
                     return 1;
-                }else if(pawnMove(board.board, pieceIndex, moveIndex) == 2 && canPawnEnpassant(pieceIndex, moveIndex)){
+                }else if(pawnMove(board, pieceIndex, moveIndex) == 2 && canPawnEnpassant(pieceIndex, moveIndex)){
                     return 1;
-                }else if(pawnMove(board.board, pieceIndex, moveIndex) == 3 && canPieceMove(pieceIndex, moveIndex)){
+                }else if(pawnMove(board, pieceIndex, moveIndex) == 3 && canPieceMove(pieceIndex, moveIndex)){
                     return 4;
                 }
-            } else if (piece == 'r' && (horizontalMove(board.board,pieceIndex, moveIndex) || verticalMove(board.board,pieceIndex, moveIndex))) {
+            } else if (piece == 'r' && (horizontalMove(board,pieceIndex, moveIndex) || verticalMove(board,pieceIndex, moveIndex))) {
                 if(canPieceMove(pieceIndex, moveIndex)){
                     return 1;
                 }
-            } else if (piece == 'q' && (horizontalMove(board.board,pieceIndex, moveIndex) || verticalMove(board.board,pieceIndex, moveIndex) || diagonalMove(board.board,pieceIndex, moveIndex))) {
+            } else if (piece == 'q' && (horizontalMove(board,pieceIndex, moveIndex) || verticalMove(board,pieceIndex, moveIndex) || diagonalMove(board,pieceIndex, moveIndex))) {
                 if(canPieceMove(pieceIndex, moveIndex)){
                     return 1;
                 }
-            } else if (piece == 'n' && knightMove(board.board,pieceIndex, moveIndex)) {
+            } else if (piece == 'n' && knightMove(board,pieceIndex, moveIndex)) {
                 if(canPieceMove(pieceIndex, moveIndex)){
                     return 1;
                 }
-            } else if (piece == 'b' && diagonalMove(board.board,pieceIndex, moveIndex)) {
+            } else if (piece == 'b' && diagonalMove(board,pieceIndex, moveIndex)) {
                 if(canPieceMove(pieceIndex, moveIndex)){
                     return 1;
                 }
-            } else if (piece == 'k' && kingMove(board.board,pieceIndex, moveIndex) != 0) {
+            } else if (piece == 'k' && kingMove(board,pieceIndex, moveIndex) != 0) {
                 if(canPieceMove(pieceIndex, moveIndex)) {
-                    return kingMove(board.board, pieceIndex, moveIndex);
+                    return kingMove(board, pieceIndex, moveIndex);
                 }
             }
 
