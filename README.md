@@ -1,8 +1,8 @@
 # java-chess
 # _**TESTED IN IntelliJ IDEA on JAVA jdk-18**_ </br>
 
-Functional graphical chess with chess engine playing as black. </br>
-##### Chess engine is set at depth: 2</br>
+Functional graphical chess with very simple chess engine (minimax algorithm) playing as black. </br>
+##### Chess engine is set at depth: 4</br>
 
 How to run:
 
