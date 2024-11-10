@@ -27,7 +27,7 @@ public class Board extends JPanel{
     }
     BufferedImage sheet;{
         try{
-            sheet = ImageIO.read(ClassLoader.getSystemResourceAsStream("pieces.png"));
+            sheet = ImageIO.read(ClassLoader.getSystemResourceAsStream("res/pieces.png"));
         }catch(IOException e){
             e.printStackTrace();
         }
