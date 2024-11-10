@@ -11,7 +11,7 @@ public class trebfish {
             50, 50, 50, 50, 50, 50, 50, 50,
             10, 10, 20, 30, 30, 20, 10, 10,
             5, 5, 10, 25, 25, 10, 5, 5,
-            0, 0, 0, 20, 20, 0, 0, 0,
+            0, 0, 0, 25, 25, 0, 0, 0,
             5, -5, -10, 0, 0, -10, -5, 5,
             5, 10, 10, -20, -20, 10, 10, 5,
             0, 0, 0, 0, 0, 0, 0, 0};
@@ -24,23 +24,27 @@ public class trebfish {
             10, 10, 20, 30, 30, 20, 10, 10,
             50, 50, 50, 50, 50, 50, 50, 50,
             0, 0, 0, 0, 0, 0, 0, 0};
-    static int[] knightBestPosition = {-50, -40, -30, -30, -30, -30, -40, -50,
-            -40, -20, 0, 0, 0, 0, -20, -40,
-            -30, 0, 10, 15, 15, 10, 0, -30,
-            -30, 5, 15, 20, 20, 15, 5, -30,
-            -30, 0, 15, 20, 20, 15, 0, -30,
-            -30, 5, 10, 15, 15, 10, 5, -30,
-            -40, -20, 0, 5, 5, 0, -20, -40,
-            -50, -40, -30, -30, -30, -30, -40, -50};
+    static int[] knightBestPosition = {
+                -50, -40, -30, -30, -30, -30, -40, -50,
+                -40, -20, 0, 5, 5, 0, -20, -40,
+                -30, 5, 15, 20, 20, 15, 5, -30,
+                -30, 10, 20, 25, 25, 20, 10, -30,
+                -30, 5, 20, 25, 25, 20, 5, -30,
+                -30, 10, 15, 20, 20, 15, 10, -30,
+                -40, -20, 5, 10, 10, 5, -20, -40,
+                -50, -40, -30, -30, -30, -30, -40, -50
+    };
 
-    static int[] bishopBestPosition = {-20, -10, -10, -10, -10, -10, -10, -20,
-            -10, 0, 0, 0, 0, 0, 0, -10,
-            -10, 0, 5, 10, 10, 5, 0, -10,
-            -10, 5, 5, 10, 10, 5, 5, -10,
-            -10, 0, 10, 10, 10, 10, 0, -10,
-            -10, 10, 10, 10, 10, 10, 10, -10,
-            -10, 5, 0, 0, 0, 0, 5, -10,
-            -20, -10, -10, -10, -10, -10, -10, -20};
+    static int[] bishopBestPosition = {
+            -20, -10, -10, -10, -10, -10, -10, -20,
+            -10, 0, 0, 5, 5, 0, 0, -10,
+            -10, 0, 10, 15, 15, 10, 0, -10,
+            -10, 5, 10, 20, 20, 10, 5, -10,
+            -10, 0, 15, 20, 20, 15, 0, -10,
+            -10, 10, 10, 15, 15, 10, 10, -10,
+            -10, 0, 5, 5, 5, 5, 0, -10,
+            -20, -10, -10, -10, -10, -10, -10, -20
+    };
 
     static int[] whiteRookBestPosition = {0, 0, 0, 0, 0, 0, 0, 0,
             5, 10, 10, 10, 10, 10, 10, 5,
@@ -141,9 +145,9 @@ public class trebfish {
                         if (validateMove(i, j, board) != 0) {
                             char[] newBoard = board.clone();
                             temporarMove(newBoard, i, j);
-                            int eval = evaluateBoard(newBoard);
-                            minimax(newBoard, depth - 1, false);
+                            int eval = minimax(newBoard, depth - 1, false);
                             maxEvaluation = Math.max(maxEvaluation, eval);
+                            System.out.println("Current maxEvaluation: " + maxEvaluation);
                         }
                     }
                 }
@@ -158,9 +162,9 @@ public class trebfish {
                         if (validateMove(i, j, board) != 0) {
                             char[] newBoard = board.clone();
                             temporarMove(newBoard, i, j);
-                            int eval = evaluateBoard(newBoard);
-                            minimax(newBoard, depth - 1, true);
+                            int eval = minimax(newBoard, depth - 1, true);
                             minEvaluation = Math.min(minEvaluation, eval);
+                            System.out.println("Current minEvaluation: " + minEvaluation);
                         }
                     }
                 }
@@ -168,6 +172,7 @@ public class trebfish {
             return minEvaluation;
         }
     }
+
 
 
     public static char[] makeAiMove(char[] board) {
@@ -187,7 +192,7 @@ public class trebfish {
                         temporarMove(newBoard, i, j);
                         char[] blackBoard = newBoard.clone();
                         isWhiteTurn = true;
-                        newEvalution = minimax(newBoard, 2, false);
+                        newEvalution = minimax(newBoard, 4, false);
                         if (newEvalution < bestEvaluation) {
                             bestEvaluation = newEvalution;
                             bestBoard = blackBoard.clone();
