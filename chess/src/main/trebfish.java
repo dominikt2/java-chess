@@ -7,7 +7,7 @@ public class trebfish {
 
     public static boolean isWhiteTurn = false;
 
-    static int[] whitePawnBestPosition = {0, 0, 0, 0, 0, 0, 0, 0,
+    static int[] whitePawnBestPosition = {50, 50, 50, 50, 50, 50, 50, 50,
             50, 50, 50, 50, 50, 50, 50, 50,
             10, 10, 20, 30, 30, 20, 10, 10,
             5, 5, 10, 25, 25, 10, 5, 5,
@@ -23,7 +23,7 @@ public class trebfish {
             5, 5, 10, 25, 25, 10, 5, 5,
             10, 10, 20, 30, 30, 20, 10, 10,
             50, 50, 50, 50, 50, 50, 50, 50,
-            0, 0, 0, 0, 0, 0, 0, 0};
+            50, 50, 50, 50, 50, 50, 50, 50};
     static int[] knightBestPosition = {
                 -50, -40, -30, -30, -30, -30, -40, -50,
                 -40, -20, 0, 5, 5, 0, -20, -40,
@@ -126,27 +126,39 @@ public class trebfish {
         }
         return (whiteAdvantage - blackAdvantage);
     }
+    public static void printBoard(char[] board){
+        for(int i=0; i<64; i++){
+            if(i % 8 == 0){
+                System.out.println();
+            }
+            System.out.print(board[i] + " ");
+        }
+        System.out.println();
+    }
 
-    public static int minimax(char[] board, int depth, boolean isMaximizing) {
-        System.out.println("Entering minimax with depth: " + depth + " and isMaximizing: " + isMaximizing);
-
+    public static int minimax(char[] board, int depth, int alpha, int beta,  boolean isMaximizing) {
+        //System.out.println("Entering minimax with depth: " + depth + " and isMaximizing: " + isMaximizing);
         if (depth == 0) {
             int evaluation = evaluateBoard(board);
-            System.out.println("Evaluating board at depth 0: " + evaluation);
+            //System.out.println("Evaluating board at depth 0: " + evaluation);
             return evaluation;
         }
-
         if (isMaximizing) {
-            isWhiteTurn = false;
             int maxEvaluation = Integer.MIN_VALUE;
             for (int i = 0; i < 64; i++) {
                 if (Character.isLowerCase(board[i])) {
                     for (int j = 0; j < 64; j++) {
                         if (validateMove(i, j, board) != 0) {
                             char[] newBoard = board.clone();
-                            temporarMove(newBoard, i, j);
-                            int eval = minimax(newBoard, depth - 1, false);
-                            maxEvaluation = Math.max(maxEvaluation, eval);
+                            tempMove(newBoard, i, j);
+                            int eval = minimax(newBoard, depth - 1, alpha, beta,  false);
+                            if(eval > maxEvaluation){
+                                maxEvaluation = eval;
+                            }
+                            alpha = Math.max(alpha, eval);
+                            if (beta <= alpha) {
+                                break;
+                            }
                             System.out.println("Current maxEvaluation: " + maxEvaluation);
                         }
                     }
@@ -154,16 +166,21 @@ public class trebfish {
             }
             return maxEvaluation;
         } else {
-            isWhiteTurn = true;
             int minEvaluation = Integer.MAX_VALUE;
             for (int i = 0; i < 64; i++) {
                 if (Character.isUpperCase(board[i])) {
                     for (int j = 0; j < 64; j++) {
                         if (validateMove(i, j, board) != 0) {
                             char[] newBoard = board.clone();
-                            temporarMove(newBoard, i, j);
-                            int eval = minimax(newBoard, depth - 1, true);
-                            minEvaluation = Math.min(minEvaluation, eval);
+                            tempMove(newBoard, i, j);
+                            int eval = minimax(newBoard, depth - 1, alpha, beta,  true);
+                            if(eval < minEvaluation){
+                                minEvaluation = eval;
+                            }
+                            beta = Math.min(beta, eval);
+                            if (beta <= alpha) {
+                                break;
+                            }
                             System.out.println("Current minEvaluation: " + minEvaluation);
                         }
                     }
@@ -177,7 +194,7 @@ public class trebfish {
 
     public static char[] makeAiMove(char[] board) {
         char[] bestBoard = board.clone();
-        int bestEvaluation = 10000;
+        int bestEvaluation = Integer.MAX_VALUE;
         int newEvalution;
         int newWhiteEvaluation;
 
@@ -190,12 +207,10 @@ public class trebfish {
                     if (validateMove(i, j, board) != 0) {
                         char[] newBoard = board.clone();
                         temporarMove(newBoard, i, j);
-                        char[] blackBoard = newBoard.clone();
-                        isWhiteTurn = true;
-                        newEvalution = minimax(newBoard, 4, false);
+                        newEvalution = minimax(newBoard, 3, Integer.MIN_VALUE, Integer.MAX_VALUE, false);
                         if (newEvalution < bestEvaluation) {
                             bestEvaluation = newEvalution;
-                            bestBoard = blackBoard.clone();
+                            bestBoard = newBoard.clone();
                             bestPieceIndex = i;
                             bestMoveIndex = j;
                         }
@@ -208,12 +223,19 @@ public class trebfish {
         return bestBoard;
     }
 
+    public static char[] tempMove(char[] board, int pieceIndex, int moveIndex) {
+        char[] tempBoard = board.clone();
+        tempBoard[moveIndex] = tempBoard[pieceIndex];
+        tempBoard[pieceIndex] = ' ';
+        return tempBoard;
+    }
+
     public static char[] temporarMove(char[] board, int pieceIndex, int moveIndex) {
 
         if(validateMove(pieceIndex, moveIndex, board) == 1) {
-            if (Game.pawnMove(board, pieceIndex, moveIndex) == 2 && Game.blackEnpassantMade) {
+            if (pawnMove(board, pieceIndex, moveIndex) == 2 && Game.blackEnpassantMade) {
                 board[moveIndex - 8] = ' ';
-            }else if(isWhiteTurn && Game.pawnMove(board, pieceIndex, moveIndex) == 2 && Game.whiteEnpassantMade){
+            }else if(isWhiteTurn && pawnMove(board, pieceIndex, moveIndex) == 2 && Game.whiteEnpassantMade){
                 board[moveIndex + 8] = ' ';
             }
             board[moveIndex] = board[pieceIndex];
@@ -346,7 +368,7 @@ public class trebfish {
 
     public static int validateMove(int pieceIndex, int moveIndex, char[] board) {
         char piece = board[pieceIndex];
-        if (isWhiteTurn) {
+
             if(piece == 'P' && pawnMove(board, pieceIndex, moveIndex) != 0) {
                 if(pawnMove(board, pieceIndex, moveIndex) == 1 && canPieceMove(board, pieceIndex, moveIndex)){
                     return 1;
@@ -376,7 +398,7 @@ public class trebfish {
                     return kingMove(board,pieceIndex, moveIndex);
                 }
             }
-        }else{
+
             if (piece == 'p' && pawnMove(board,pieceIndex, moveIndex) != 0) {
                 if(pawnMove(board, pieceIndex, moveIndex) == 1 && canPieceMove(board, pieceIndex, moveIndex)){
                     return 1;
@@ -407,7 +429,6 @@ public class trebfish {
                 }
             }
 
-        }
         return 0;
     }
 
