@@ -1,7 +1,8 @@
 # java-chess
 # _**TESTED IN IntelliJ IDEA on JAVA jdk-18**_ </br>
 
-Functional graphical chess game made fully in java. </br>
+Functional graphical chess with chess engine playing black. </br>
+#####Chess engine is set at depth: 2</br>
 
 How to run:
 
