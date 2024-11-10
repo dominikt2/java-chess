@@ -60,6 +60,7 @@ public class Game extends MouseAdapter {
                 board.board[i] = newBoard[i];
             }
             board.repaint();
+            isWhiteTurn = !isWhiteTurn;
             aiMakingMove = false;
         }
     }
@@ -185,9 +186,6 @@ public class Game extends MouseAdapter {
             }
             isWhiteTurn = !isWhiteTurn;
         }
-
-
-
 
 
     public static char[] makeTemporarMove(char[] board, int pieceIndex, int moveIndex){
