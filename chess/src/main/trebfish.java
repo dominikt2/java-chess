@@ -5,6 +5,9 @@ import java.util.ArrayList;
 
 public class trebfish {
 
+    public static boolean whiteEnpassantMade = false;
+    public static boolean blackEnpassantMade = false;
+
     public static char[] bestMove = new char[64];
     public static boolean isWhiteTurn = false;
 
@@ -127,15 +130,6 @@ public class trebfish {
         }
         return (blackAdvantage - whiteAdvantage);
     }
-    public static void printBoard(char[] board){
-        for(int i=0; i<64; i++){
-            if(i % 8 == 0){
-                System.out.println();
-            }
-            System.out.print(board[i] + " ");
-        }
-        System.out.println();
-    }
 
     public static int minimax(char[] board, int depth, int alpha, int beta,  boolean isMaximizing) {
         if (depth == 0) {
@@ -143,6 +137,7 @@ public class trebfish {
             return evaluation;
         }
         if (isMaximizing) {
+            isWhiteTurn = false;
             int maxEvaluation = Integer.MIN_VALUE;
             for (int i = 0; i < 64; i++) {
                 if (Character.isLowerCase(board[i])) {
@@ -165,6 +160,7 @@ public class trebfish {
             }
             return maxEvaluation;
         } else {
+            isWhiteTurn = true;
             int minEvaluation = Integer.MAX_VALUE;
             for (int i = 0; i < 64; i++) {
                 if (Character.isUpperCase(board[i])) {
@@ -203,7 +199,7 @@ public class trebfish {
                     if (validateMove(i, j, board) != 0) {
                         char[] newBoard = board.clone();
                         temporarMove(newBoard, i, j);
-                        int evaluation = minimax(newBoard, 3, Integer.MIN_VALUE, Integer.MAX_VALUE, false);
+                        int evaluation = minimax(newBoard, 4, Integer.MIN_VALUE, Integer.MAX_VALUE, false);
                         if (evaluation > bestEvaluation) {
                             bestEvaluation = evaluation;
                             bestPieceIndex = i;
@@ -240,6 +236,11 @@ public class trebfish {
             }
             board[moveIndex] = board[pieceIndex];
             board[pieceIndex] = ' ';
+            if(moveIndex <= 7 && board[moveIndex] == 'P') {
+                board[moveIndex] = 'Q';
+            }else if(moveIndex >= 56 && board[moveIndex] == 'p') {
+                board[moveIndex] = 'q';
+            }
         }else if(validateMove(pieceIndex, moveIndex, board) == 2){
             board[moveIndex] = board[pieceIndex];
             board[pieceIndex + 1] = board[pieceIndex + 3];
@@ -249,12 +250,6 @@ public class trebfish {
             board[moveIndex] = board[pieceIndex];
             board[pieceIndex - 1] = board[pieceIndex - 4];
             board[pieceIndex - 4] = ' ';
-            board[pieceIndex] = ' ';
-        }else if(validateMove(pieceIndex, moveIndex, board) == 4) {
-            board[moveIndex] = 'q';
-            board[pieceIndex] = ' ';
-        }else if(isWhiteTurn && validateMove(pieceIndex, moveIndex, board) == 4) {
-            board[moveIndex] = 'Q';
             board[pieceIndex] = ' ';
         }
         return board;
@@ -373,8 +368,6 @@ public class trebfish {
                     return 1;
                 }else if(pawnMove(board, pieceIndex, moveIndex) == 2 && canPawnEnpassant(board, pieceIndex, moveIndex)){
                     return 1;
-                }else if(pawnMove(board, pieceIndex, moveIndex) == 3 && canPieceMove(board, pieceIndex, moveIndex)){
-                    return 4;
                 }
             } else if (piece == 'R' && (horizontalMove(board,pieceIndex, moveIndex) || verticalMove(board,pieceIndex, moveIndex))) {
                 if(canPieceMove(board, pieceIndex, moveIndex)){
@@ -403,8 +396,6 @@ public class trebfish {
                     return 1;
                 }else if(pawnMove(board, pieceIndex, moveIndex) == 2 && canPawnEnpassant(board, pieceIndex, moveIndex)){
                     return 1;
-                }else if(pawnMove(board, pieceIndex, moveIndex) == 3 && canPieceMove(board, pieceIndex, moveIndex)){
-                    return 4;
                 }
             } else if (piece == 'r' && (horizontalMove(board,pieceIndex, moveIndex) || verticalMove(board,pieceIndex, moveIndex))) {
                 if(canPieceMove(board, pieceIndex, moveIndex)){
@@ -533,34 +524,24 @@ public class trebfish {
     public static int pawnMove(char[] board, int pieceIndex, int moveIndex){
         if(board[pieceIndex] == 'P'){
             if(moveIndex / 8 == pieceIndex / 8 - 1 && moveIndex % 8 == pieceIndex % 8 && board[moveIndex] == ' '){
-                if(moveIndex / 8 == 0){
-                    return 3;
-                }
                 return 1;
             }else if((pieceIndex <=55 && pieceIndex >=48) && pieceIndex-16 == moveIndex && board[moveIndex] == ' '){
                 return 1;
             }else if((pieceIndex-9 == moveIndex || pieceIndex-7 == moveIndex) && Character.isLowerCase(board[moveIndex]) && moveIndex / 8 == pieceIndex / 8 - 1) {
-                if(moveIndex / 8 == 0){
-                    return 3;
-                }
                 return 1;
             }else if(pieceIndex >=24 && pieceIndex <= 31 && (Game.whiteEnpassatnt[0] == 1 && Game.whiteEnpassatnt[1] == moveIndex+8)){
+                whiteEnpassantMade = Game.whiteEnpassantMade;
                 return 2;
             }
         }else if(board[pieceIndex] == 'p'){
             if(moveIndex / 8 == pieceIndex / 8 + 1 && moveIndex % 8 == pieceIndex % 8 && board[moveIndex] == ' '){
-                if(moveIndex / 8 == 7){
-                    return 3;
-                }
                 return 1;
             }else if((pieceIndex <=15 && pieceIndex >=8) && pieceIndex+16 == moveIndex && board[moveIndex] == ' '){
                 return 1;
             }else if((pieceIndex+9 == moveIndex || pieceIndex+7 == moveIndex) && Character.isUpperCase(board[moveIndex]) && moveIndex / 8 == pieceIndex / 8 + 1) {
-                if(moveIndex / 8 == 7){
-                    return 3;
-                }
                 return 1;
             }else if(pieceIndex >= 32 && pieceIndex <= 39 && (Game.blackEnpassant[0] == 1 && Game.blackEnpassant[1] == moveIndex-8)){
+                blackEnpassantMade = Game.blackEnpassantMade;
                 return 2;
             }
         }
