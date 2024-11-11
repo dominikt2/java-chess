@@ -56,9 +56,7 @@ public class Game extends MouseAdapter {
         if (!aiMakingMove && !isWhiteTurn) {
             aiMakingMove = true;
             char[] newBoard = trebfish.makeAiMove(board.board);
-            for (int i = 0; i < 64; i++) {
-                board.board[i] = newBoard[i];
-            }
+            board.board = newBoard;
             board.repaint();
             isWhiteTurn = !isWhiteTurn;
             aiMakingMove = false;
@@ -133,16 +131,22 @@ public class Game extends MouseAdapter {
                     board.repaint();
                     if (chessBoard[moveIndex] == 'K') {
                         whiteKingMoved++;
-                    } else if (chessBoard[moveIndex] == 'k') {
+                    }else if (chessBoard[moveIndex] == 'k') {
                         blackKingMoved++;
-                    } else if (piece == 'R' && tempPieceIndex == 56) {
+                    }else if (piece == 'R' && tempPieceIndex == 56) {
                         whiteRookMoved[0]++;
-                    } else if (piece == 'R' && tempPieceIndex == 63) {
+                    }else if (piece == 'R' && tempPieceIndex == 63) {
                         whiteRookMoved[1]++;
-                    } else if (piece == 'r' && tempPieceIndex == 0) {
+                    }else if (piece == 'r' && tempPieceIndex == 0) {
                         blackRookMoved[0]++;
-                    } else if (piece == 'r' && tempPieceIndex == 7) {
+                    }else if (piece == 'r' && tempPieceIndex == 7) {
                         blackRookMoved[1]++;
+                    }else if(moveIndex <= 7 && chessBoard[moveIndex] == 'P') {
+                        chessBoard[moveIndex] = 'Q';
+                        board.repaint();
+                    }else if(moveIndex >= 56 && chessBoard[moveIndex] == 'p') {
+                        chessBoard[moveIndex] = 'q';
+                        board.repaint();
                     }
                 } else if (validateMove(pieceIndex, moveIndex, chessBoard) == 2) {
                     clearEnpassant();
@@ -158,21 +162,7 @@ public class Game extends MouseAdapter {
                     chessBoard[pieceIndex - 4] = ' ';
                     chessBoard[pieceIndex] = ' ';
                     board.repaint();
-                } else if (validateMove(pieceIndex, moveIndex, chessBoard) == 4) {
-                    if (isWhiteTurn) {
-                        clearEnpassant();
-                        chessBoard[moveIndex] = 'Q';
-                        chessBoard[pieceIndex] = ' ';
-                        board.repaint();
-                        paintPromotionMenuWhite(board.getGraphics());
-                    } else {
-                        clearEnpassant();
-                        chessBoard[moveIndex] = 'q';
-                        chessBoard[pieceIndex] = ' ';
-                        board.repaint();
-                        paintPromotionMenuWhite(board.getGraphics());
-                    }
-                } else {
+                }else {
                     return;
                 }
             } else {
@@ -299,8 +289,6 @@ public class Game extends MouseAdapter {
                     return 1;
                 }else if(pawnMove(board, pieceIndex, moveIndex) == 2 && canPawnEnpassant(pieceIndex, moveIndex)){
                     return 1;
-                }else if(pawnMove(board, pieceIndex, moveIndex) == 3 && canPieceMove(pieceIndex, moveIndex)){
-                    return 4;
                 }
             } else if (piece == 'R' && (horizontalMove(board,pieceIndex, moveIndex) || verticalMove(board,pieceIndex, moveIndex))) {
                 if(canPieceMove(pieceIndex, moveIndex)){
@@ -329,8 +317,6 @@ public class Game extends MouseAdapter {
                     return 1;
                 }else if(pawnMove(board, pieceIndex, moveIndex) == 2 && canPawnEnpassant(pieceIndex, moveIndex)){
                     return 1;
-                }else if(pawnMove(board, pieceIndex, moveIndex) == 3 && canPieceMove(pieceIndex, moveIndex)){
-                    return 4;
                 }
             } else if (piece == 'r' && (horizontalMove(board,pieceIndex, moveIndex) || verticalMove(board,pieceIndex, moveIndex))) {
                 if(canPieceMove(pieceIndex, moveIndex)){
@@ -460,16 +446,10 @@ public class Game extends MouseAdapter {
     public static int pawnMove(char[] board, int pieceIndex, int moveIndex){
         if(board[pieceIndex] == 'P'){
             if(moveIndex / 8 == pieceIndex / 8 - 1 && moveIndex % 8 == pieceIndex % 8 && board[moveIndex] == ' '){
-                if(moveIndex / 8 == 0){
-                    return 3;
-                }
                 return 1;
             }else if((pieceIndex <=55 && pieceIndex >=48) && pieceIndex-16 == moveIndex && board[moveIndex] == ' '){
                 return 1;
             }else if((pieceIndex-9 == moveIndex || pieceIndex-7 == moveIndex) && Character.isLowerCase(board[moveIndex]) && moveIndex / 8 == pieceIndex / 8 - 1) {
-                if(moveIndex / 8 == 0){
-                    return 3;
-                }
                 return 1;
             }else if(pieceIndex >=24 && pieceIndex <= 31 && (whiteEnpassatnt[0] == 1 && whiteEnpassatnt[1] == moveIndex+8)){
                 whiteEnpassantMade = true;
@@ -477,16 +457,10 @@ public class Game extends MouseAdapter {
             }
         }else if(board[pieceIndex] == 'p'){
             if(moveIndex / 8 == pieceIndex / 8 + 1 && moveIndex % 8 == pieceIndex % 8 && board[moveIndex] == ' '){
-                if(moveIndex / 8 == 7){
-                    return 3;
-                }
                 return 1;
             }else if((pieceIndex <=15 && pieceIndex >=8) && pieceIndex+16 == moveIndex && board[moveIndex] == ' '){
                 return 1;
             }else if((pieceIndex+9 == moveIndex || pieceIndex+7 == moveIndex) && Character.isUpperCase(board[moveIndex]) && moveIndex / 8 == pieceIndex / 8 + 1) {
-                if(moveIndex / 8 == 7){
-                    return 3;
-                }
                 return 1;
             }else if(pieceIndex >= 32 && pieceIndex <= 39 && (blackEnpassant[0] == 1 && blackEnpassant[1] == moveIndex-8)){
                 blackEnpassantMade = true;
